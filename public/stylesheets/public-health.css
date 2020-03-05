@@ -1,0 +1,55 @@
+h1{
+    background-color: rgb(101, 38, 248);
+    margin: 0;
+    font-family: 'Roboto Condensed', sans-serif ;
+}
+
+body{
+  background: url(https://st4.depositphotos.com/1022597/20675/i/450/depositphotos_206758146-stock-photo-textured-abstract-minimalist-grey-blue.jpg);
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+h2{
+  background-color: rgba(8, 150, 155, 0.966);
+}
+
+header{
+    color: white;
+}
+
+aside{
+    width: 250px;
+    float: left;
+    background-color: aquamarine;
+    border: 6px;
+    border-color: aqua;
+    border-style: solid;
+}
+
+article{
+    width: 700px;
+    float: right;
+    background-color: aquamarine;
+    border: 6px;
+    border-color: aqua;
+    border-style: solid;
+}
+
+#map{
+    clear: both;
+    border: 6px;
+    border-color: aquamarine;
+    border-style: solid;
+}
+
+input{
+    display: block;
+}
+
+.center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+
+  }

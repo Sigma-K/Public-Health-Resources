@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDN8DkG8QqsdKoFo-8emAMh43v7RGvCfaw&callback=initMap&libraries=places,geometry"
+            async defer></script>
+
+        <link href="https://fonts.googleapis.com/css?family=Libre+Baskerville|Roboto+Condensed&display=swap" rel="stylesheet">
+
+        <style>
+            #map {
+                height: 400px;
+                width: 400px;
+            }
+        </style>
+        <title>
+            Public Health Resources Project
+        </title>
+
+        <img src="images\logo1.jpg" alt="Logo"width="150" height="150" class="center">
+
+
+        <link rel="stylesheet" href="stylesheets/public-health.css">
+    
+        <!--This section is the heading for the web page-->
+    
+    </head>
+    <body> 
+        <div id="container">
+        <header> 
+            
+    </header>
+
+    <!--This is a side bar that contains the form users will fill out to find resources-->
+
+        <aside>
+
+            <h2>Let's Get Started.</h2>
+            <form action=""  method="">
+
+                <label for="Zip">Set Home Zip Code</label>
+                
+                <input type="text" placeholder="Enter Zip Code" name="Zip" id="Zip">
+        
+                <p>   </p>
+                
+                <label for="Resources">Resources</label>
+                <select name="Resources" id="Resources">
+                    <option value="clinic">Vaccination Locations</option>
+                    <option value="gym">Fitness Classes</option>
+                    <option value="park">Outdoor Activity Locations</option>
+                </select>
+                <input id='submit' type='button' value="Go!"></button>
+            </form>
+        </aside>
+    <!--This section is a small about us type article-->
+        <article>
+            <h2>We're Here to Help!
+            </h2>
+
+            <p>Communities thrive when residents are healthy. Part of public health is making wellness services easily accessible to residents. We provide tools within a central location for residents to find pharmacies where they can receive vaccinations, fitness classes, and public outdoor spaces to engage in physical activity</p>
+        <!--Add an image here-->
+
+        <img src="https://cdn.nohat.cc/thumb/f/720/comrawpixel478022.jpg" width="200" alt="">
+        </article>
+
+        <div id="map"></div>
+
+        <script>
+            let userPos = {lat: 31.8088, lng: -85.9700};
+            var map;
+            var geocoder;
+            var service;
+            var infoWindow;
+            var currentInfoWindow;
+            var infoPane;
+            
+            function initMap() {
+                infoWindow = new google.maps.InfoWindow();
+                currentInfoWindow = infoWindow;
+                map = new google.maps.Map(
+                    document.getElementById('map'), {
+                    center: userPos,
+                    zoom: 14
+                    
+                });
+
+                document.getElementById('submit').addEventListener('click', () => {
+                    nearbyPlacesSearch();
+                });
+            }
+
+            function nearbyPlacesSearch() {
+                var address = document.getElementById('Zip').value;
+                var searchTerm = document.getElementById('Resources').value;
+                geocoder = new google.maps.Geocoder();
+                geocoder.geocode({"address": address}, (results, status) => {
+                    if(status = 'OK') {
+                        userPos = {lat: results[0].geometry.location.lat(),
+                                lng: results[0].geometry.location.lng()};
+                    }
+                    request = {
+                            location: userPos,
+                            rankBy: google.maps.places.RankBy.DISTANCE,
+                            keyword: searchTerm};
+                        
+                        service = new google.maps.places.PlacesService(map);
+                        service.nearbySearch(request, callback);
+                });
+            }
+
+            function callback(results, status) {
+                if(status == 'OK') {
+                    createMarkers(results);
+                }
+            }
+
+            function createMarkers(locations) {
+                var i = 1;
+                locations.forEach(loc => {
+                    let marker = new google.maps.Marker({
+                    position: loc.geometry.location,
+                    label: i.toString(),
+                    map: map,
+                    title: loc.name
+                    });
+                    i++;
+                    /* TODO: Step 4B: Add click listeners to the markers */
+                    // Add click listener to each marker
+                    google.maps.event.addListener(marker, 'click', () => {
+                        let request = {
+                            placeId: loc.place_id,
+                            fields: ['name', 'formatted_address', 'geometry', 'rating',
+                            'website']
+                        };
+
+                        /* Only fetch the details of a place when the user clicks on a marker.
+                        * If we fetch the details for all place results as soon as we get
+                        * the search response, we will hit API rate limits. */
+                        service.getDetails(request, (placeResult, status) => {
+                            showDetails(placeResult, marker, status)
+                        });
+                    });
+                });
+                
+                map.setCenter(locations[0].geometry.location);
+            }
+
+            function showDetails(loc, marker, status) {
+                if (status == google.maps.places.PlacesServiceStatus.OK) {
+                    infoWindow = new google.maps.InfoWindow();
+                    var rating = "None";
+                    var website = 'None';
+                    if (loc.rating)
+                        rating = loc.rating;
+                    if(loc.website)
+                        website = loc.website;
+                    infoWindow.setContent('<div><strong>' + loc.name +
+                    '</strong><br>' + 'Rating: ' + rating + '<br>' +
+                    'Address:' + loc.formatted_address + '<br>' +
+                    'Website: ' + loc.website + '</div>');
+                    infoWindow.open(marker.map, marker);
+                    currentInfoWindow.close();
+                    currentInfoWindow = infoWindow;
+                }
+            }
+
+        </script>
+    </body>
+</html>

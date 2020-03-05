@@ -1,13 +1,29 @@
-var http = require('http');
+var express = require('express');
+var path = require('path');
+var cookieParser = require('cookie-parser');
+var logger = require('morgan');
+var https = require('https');
 var fs = require('fs');
-http.createServer(function (req, res) {
-  //Open a file on the server and return its content:
-  /*fs.readFile('Public_Health_Resources.html', function(err, data) {
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    res.write(data);
-    return res.end();
-  });*/
+var privateKey = fs.readFileSync('./sslcert/server.key', 'utf8');
+var certificate = fs.readFileSync('sslcert/server.cert', 'utf8');
 
-  res.write('Hello World!');
-  res.end();
-}).listen(8080);
+var indexRouter = require('./routes/index');
+var usersRouter = require('./routes/users');
+
+var credentials = {key: privateKey, cert:certificate};
+var app = express();
+
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
+
+var httpsServer = https.createServer(credentials, app);
+
+httpsServer.listen(8000);
+
+module.exports = app;
